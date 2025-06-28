@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase 웹메신저</title>
+    <title>고급 Firebase 웹메신저</title>
     <style>
         * {
             margin: 0;
@@ -21,15 +21,99 @@
         }
 
         .container {
-            width: 90%;
-            max-width: 800px;
+            width: 95%;
+            max-width: 1200px;
             height: 90vh;
             background: white;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             display: flex;
-            flex-direction: column;
             overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #f8fafc;
+            border-right: 1px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .create-group-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .create-group-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .room-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .room-item {
+            padding: 15px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .room-item:hover {
+            background: #e2e8f0;
+        }
+
+        .room-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #5a67d8;
+        }
+
+        .room-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .room-preview {
+            font-size: 12px;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .room-item.active .room-preview {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
@@ -42,7 +126,7 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 600;
         }
 
@@ -60,12 +144,16 @@
         }
 
         .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100%;
-            padding: 40px;
+            z-index: 1000;
         }
 
         .login-form {
@@ -136,7 +224,6 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            height: calc(100% - 80px);
         }
 
         .messages {
@@ -191,27 +278,110 @@
             margin-top: 5px;
         }
 
+        .file-message {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .image-message {
+            margin-top: 8px;
+        }
+
+        .image-message img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
         .input-area {
             padding: 20px;
             background: white;
             border-top: 1px solid #e1e5e9;
             display: flex;
             gap: 10px;
-            align-items: center;
+            align-items: flex-end;
+        }
+
+        .input-container {
+            flex: 1;
+            position: relative;
         }
 
         .message-input {
-            flex: 1;
-            padding: 12px 16px;
+            width: 100%;
+            padding: 12px 50px 12px 16px;
             border: 2px solid #e1e5e9;
             border-radius: 25px;
             font-size: 14px;
             outline: none;
             transition: border-color 0.3s;
+            resize: none;
+            min-height: 45px;
+            max-height: 120px;
         }
 
         .message-input:focus {
             border-color: #667eea;
+        }
+
+        .file-input {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        .file-button {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .file-button:hover {
+            background: #f1f5f9;
         }
 
         .send-btn {
@@ -226,25 +396,120 @@
             align-items: center;
             justify-content: center;
             transition: transform 0.2s;
+            flex-shrink: 0;
         }
 
         .send-btn:hover {
             transform: scale(1.1);
         }
 
-        .online-users {
-            padding: 15px 20px;
+        .file-preview {
+            padding: 10px 20px;
             background: #f1f5f9;
-            border-bottom: 1px solid #e1e5e9;
-            font-size: 14px;
-            color: #666;
+            border-top: 1px solid #e1e5e9;
+            display: none;
         }
 
-        .typing-indicator {
-            padding: 10px 20px;
-            font-style: italic;
-            color: #888;
-            font-size: 13px;
+        .file-preview.show {
+            display: block;
+        }
+
+        .preview-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .preview-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .group-members {
+            margin-bottom: 20px;
+        }
+
+        .member-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .member-list {
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .member-item {
+            padding: 5px 10px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-member {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
         }
 
         .error-message {
@@ -258,11 +523,63 @@
             display: none;
         }
 
+        .typing-indicator {
+            padding: 10px 20px;
+            font-style: italic;
+            color: #888;
+            font-size: 13px;
+        }
+
+        .online-users {
+            padding: 10px 20px;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e1e5e9;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e1e5e9;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #667eea;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
         @media (max-width: 768px) {
             .container {
                 width: 100%;
                 height: 100vh;
                 border-radius: 0;
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-right: none;
+                border-bottom: 1px solid #e1e5e9;
+            }
+            
+            .room-list {
+                display: flex;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 10px;
+            }
+            
+            .room-item {
+                min-width: 150px;
+                margin-right: 10px;
+                margin-bottom: 0;
             }
             
             .message-bubble {
@@ -273,32 +590,24 @@
 </head>
 <body>
     <div class="container">
-        <!-- 로그인 화면 -->
-        <div id="loginScreen" class="login-screen">
-            <div class="login-form">
-                <h2>🚀 Firebase 웹메신저</h2>
-                <div class="form-group">
-                    <label for="email">이메일</label>
-                    <input type="email" id="email" placeholder="your@email.com">
+        <!-- 사이드바 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>💬 채팅방</h2>
+                <button class="create-group-btn" onclick="showGroupModal()">+ 그룹</button>
+            </div>
+            <div class="room-list" id="roomList">
+                <div class="room-item active" data-room="general" onclick="switchRoom('general')">
+                    <div class="room-name">📢 전체 채팅</div>
+                    <div class="room-preview">모든 사용자가 참여할 수 있는 공개 채팅방</div>
                 </div>
-                <div class="form-group">
-                    <label for="password">비밀번호</label>
-                    <input type="password" id="password" placeholder="비밀번호 (최소 6자)">
-                </div>
-                <div class="form-group">
-                    <label for="displayName">닉네임</label>
-                    <input type="text" id="displayName" placeholder="사용할 닉네임">
-                </div>
-                <button class="btn" onclick="signUp()">회원가입</button>
-                <button class="btn btn-secondary" onclick="signIn()">로그인</button>
-                <div id="authError" class="error-message hidden"></div>
             </div>
         </div>
 
-        <!-- 메신저 화면 -->
-        <div id="messengerScreen" class="hidden">
+        <!-- 메인 영역 -->
+        <div class="main-area">
             <div class="header">
-                <h1>💬 웹메신저</h1>
+                <h1 id="currentRoomName">📢 전체 채팅</h1>
                 <div class="user-info">
                     <div class="status-dot"></div>
                     <span id="userDisplayName"></span>
@@ -314,8 +623,18 @@
                 <div class="messages" id="messagesContainer"></div>
                 <div id="typingIndicator" class="typing-indicator hidden"></div>
                 
+                <div class="file-preview" id="filePreview"></div>
+                
                 <div class="input-area">
-                    <input type="text" id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." onkeypress="handleKeyPress(event)">
+                    <div class="input-container">
+                        <textarea id="messageInput" class="message-input" placeholder="메시지를 입력하세요..." onkeypress="handleKeyPress(event)" rows="1"></textarea>
+                        <input type="file" id="fileInput" class="file-input" multiple accept="image/*,video/*,audio/*,application/*" onchange="handleFileSelect(event)">
+                        <button class="file-button" onclick="document.getElementById('fileInput').click()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <button class="send-btn" onclick="sendMessage()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -327,16 +646,67 @@
         </div>
     </div>
 
+    <!-- 로그인 화면 -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-form">
+            <h2>🚀 고급 웹메신저</h2>
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" placeholder="비밀번호 (최소 6자)">
+            </div>
+            <div class="form-group">
+                <label for="displayName">닉네임</label>
+                <input type="text" id="displayName" placeholder="사용할 닉네임">
+            </div>
+            <button class="btn" onclick="signUp()">회원가입</button>
+            <button class="btn btn-secondary" onclick="signIn()">로그인</button>
+            <div id="authError" class="error-message hidden"></div>
+        </div>
+    </div>
+
+    <!-- 그룹 생성 모달 -->
+    <div id="groupModal" class="modal">
+        <div class="modal-content">
+            <h3>📝 새 그룹 채팅방 만들기</h3>
+            <div class="form-group">
+                <label>그룹 이름</label>
+                <input type="text" id="groupName" placeholder="그룹 이름을 입력하세요">
+            </div>
+            <div class="group-members">
+                <label>멤버 초대 (이메일)</label>
+                <input type="email" id="memberEmail" class="member-input" placeholder="초대할 사람의 이메일" onkeypress="handleMemberKeyPress(event)">
+                <button class="btn" onclick="addMember()">멤버 추가</button>
+                <div class="member-list" id="memberList"></div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="createGroup()">그룹 만들기</button>
+                <button class="btn btn-secondary" onclick="hideGroupModal()">취소</button>
+            </div>
+            <div id="groupError" class="error-message hidden"></div>
+        </div>
+    </div>
+
+    <!-- 이미지 확대 모달 -->
+    <div id="imageModal" class="modal" onclick="hideImageModal()">
+        <div style="text-align: center;">
+            <img id="modalImage" style="max-width: 90%; max-height: 90%; border-radius: 10px;">
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
-        // Firebase 설정 (실제 프로젝트에서는 여러분의 Firebase 설정값으로 교체해야 합니다)
+        // Firebase 설정
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
-        import { getDatabase, ref, push, onValue, serverTimestamp, onDisconnect, set } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
+        import { getDatabase, ref, push, onValue, serverTimestamp, onDisconnect, set, get } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
+        import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js';
 
         // ⚠️ 여기에 여러분의 Firebase 설정을 입력하세요
         const firebaseConfig = {
-            // Firebase 콘솔에서 복사한 설정값들
             apiKey: "AIzaSyDo19gtjMrqPysnMp4mSuhjvwOMGSOSgds",
             authDomain: "webmessanger-fbcac.firebaseapp.com",
             databaseURL: "https://webmessanger-fbcac-default-rtdb.firebaseio.com",
@@ -347,16 +717,20 @@
             measurementId: "G-HBB9CPQNCB"
         };
 
-        let app, auth, database;
+        let app, auth, database, storage;
         let currentUser = null;
+        let currentRoom = 'general';
         let messagesRef = null;
+        let selectedFiles = [];
+        let groupMembers = [];
 
-        // Firebase 초기화 (실제 설정이 있을 때만)
+        // Firebase 초기화
         try {
             if (firebaseConfig.apiKey !== "your-api-key") {
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 database = getDatabase(app);
+                storage = getStorage(app);
                 
                 // 인증 상태 변경 감지
                 onAuthStateChanged(auth, (user) => {
@@ -364,6 +738,7 @@
                         currentUser = user;
                         showMessenger();
                         setupRealtimeChat();
+                        loadRooms();
                         updateOnlineStatus(true);
                     } else {
                         currentUser = null;
@@ -371,7 +746,6 @@
                     }
                 });
             } else {
-                // 데모 모드
                 showDemoMode();
             }
         } catch (error) {
@@ -398,6 +772,15 @@
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await updateProfile(userCredential.user, { displayName: displayName });
+                
+                // 사용자 프로필 저장
+                const userRef = ref(database, `users/${userCredential.user.uid}`);
+                await set(userRef, {
+                    displayName: displayName,
+                    email: email,
+                    createdAt: serverTimestamp()
+                });
+                
                 hideError();
             } catch (error) {
                 showError(getErrorMessage(error.code));
@@ -431,199 +814,156 @@
                 updateOnlineStatus(false);
                 await firebaseSignOut(auth);
             } else {
-                // 데모 모드에서는 그냥 로그인 화면으로
                 showLogin();
             }
         };
 
-        window.sendMessage = function() {
+        window.sendMessage = async function() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
             
-            if (!message) return;
+            if (!message && selectedFiles.length === 0) return;
 
             if (database && currentUser) {
-                // Firebase로 메시지 전송
-                push(messagesRef, {
-                    text: message,
+                const messageData = {
                     userId: currentUser.uid,
                     userName: currentUser.displayName || '익명',
-                    timestamp: serverTimestamp()
-                });
+                    timestamp: serverTimestamp(),
+                    room: currentRoom
+                };
+
+                if (message) {
+                    messageData.text = message;
+                }
+
+                if (selectedFiles.length > 0) {
+                    messageData.files = [];
+                    
+                    for (const file of selectedFiles) {
+                        try {
+                            const downloadURL = await uploadFile(file);
+                            messageData.files.push({
+                                name: file.name,
+                                size: file.size,
+                                type: file.type,
+                                url: downloadURL
+                            });
+                        } catch (error) {
+                            console.error('파일 업로드 실패:', error);
+                        }
+                    }
+                }
+
+                await push(messagesRef, messageData);
             } else {
-                // 데모 모드
-                addDemoMessage(message, true);
+                addDemoMessage(message, true, selectedFiles);
             }
             
             messageInput.value = '';
+            selectedFiles = [];
+            hideFilePreview();
+            adjustTextareaHeight();
         };
 
         window.handleKeyPress = function(event) {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
                 sendMessage();
             }
         };
 
-        function showLogin() {
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('messengerScreen').classList.add('hidden');
-        }
+        window.handleFileSelect = function(event) {
+            const files = Array.from(event.target.files);
+            selectedFiles = [...selectedFiles, ...files];
+            showFilePreview();
+            event.target.value = '';
+        };
 
-        function showMessenger() {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('messengerScreen').classList.remove('hidden');
+        window.switchRoom = function(roomId) {
+            currentRoom = roomId;
             
-            if (currentUser) {
-                document.getElementById('userDisplayName').textContent = currentUser.displayName || '사용자';
-                document.getElementById('onlineStatus').textContent = '온라인';
-            }
-        }
-
-        function setupRealtimeChat() {
-            if (!database) return;
-            
-            messagesRef = ref(database, 'messages');
-            
-            onValue(messagesRef, (snapshot) => {
-                const messages = [];
-                snapshot.forEach((child) => {
-                    messages.push({
-                        id: child.key,
-                        ...child.val()
-                    });
-                });
-                
-                displayMessages(messages);
+            // UI 업데이트
+            document.querySelectorAll('.room-item').forEach(item => {
+                item.classList.remove('active');
             });
-        }
-
-        function displayMessages(messages) {
-            const container = document.getElementById('messagesContainer');
-            container.innerHTML = '';
+            document.querySelector(`[data-room="${roomId}"]`).classList.add('active');
             
-            messages.forEach(msg => {
-                const isOwn = currentUser && msg.userId === currentUser.uid;
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${isOwn ? 'own' : ''}`;
+            // 방 이름 업데이트
+            const roomName = document.querySelector(`[data-room="${roomId}"] .room-name`).textContent;
+            document.getElementById('currentRoomName').textContent = roomName;
+            
+            // 메시지 다시 로드
+            setupRealtimeChat();
+        };
+
+        window.showGroupModal = function() {
+            document.getElementById('groupModal').classList.add('show');
+            groupMembers = [];
+            updateMemberList();
+        };
+
+        window.hideGroupModal = function() {
+            document.getElementById('groupModal').classList.remove('show');
+            document.getElementById('groupName').value = '';
+            document.getElementById('memberEmail').value = '';
+            hideGroupError();
+        };
+
+        window.handleMemberKeyPress = function(event) {
+            if (event.key === 'Enter') {
+                addMember();
+            }
+        };
+
+        window.addMember = function() {
+            const email = document.getElementById('memberEmail').value.trim();
+            
+            if (!email) {
+                showGroupError('이메일을 입력해주세요.');
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                showGroupError('올바른 이메일 형식이 아닙니다.');
+                return;
+            }
+            
+            if (groupMembers.includes(email)) {
+                showGroupError('이미 추가된 멤버입니다.');
+                return;
+            }
+            
+            groupMembers.push(email);
+            document.getElementById('memberEmail').value = '';
+            updateMemberList();
+            hideGroupError();
+        };
+
+        window.removeMember = function(email) {
+            groupMembers = groupMembers.filter(member => member !== email);
+            updateMemberList();
+        };
+
+        window.createGroup = async function() {
+            const groupName = document.getElementById('groupName').value.trim();
+            
+            if (!groupName) {
+                showGroupError('그룹 이름을 입력해주세요.');
+                return;
+            }
+            
+            if (groupMembers.length === 0) {
+                showGroupError('최소 1명의 멤버를 추가해주세요.');
+                return;
+            }
+
+            if (!database || !currentUser) {
+                showGroupError('Firebase 설정이 필요합니다.');
+                return;
+            }
+
+            try {
+                const groupId = `group_${Date.now()}`;
+                const groupRef = ref(database, `rooms/${groupId}`);
                 
-                messageDiv.innerHTML = `
-                    <div class="message-info">${msg.userName}</div>
-                    <div class="message-bubble">
-                        ${msg.text}
-                        <div class="message-time">${formatTime(msg.timestamp)}</div>
-                    </div>
-                `;
-                
-                container.appendChild(messageDiv);
-            });
-            
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function updateOnlineStatus(online) {
-            if (!database || !currentUser) return;
-            
-            const userStatusRef = ref(database, `users/${currentUser.uid}/online`);
-            
-            if (online) {
-                set(userStatusRef, true);
-                onDisconnect(userStatusRef).set(false);
-            } else {
-                set(userStatusRef, false);
-            }
-        }
-
-        function showError(message) {
-            const errorDiv = document.getElementById('authError');
-            errorDiv.textContent = message;
-            errorDiv.classList.remove('hidden');
-        }
-
-        function hideError() {
-            document.getElementById('authError').classList.add('hidden');
-        }
-
-        function getErrorMessage(errorCode) {
-            switch (errorCode) {
-                case 'auth/email-already-in-use':
-                    return '이미 사용 중인 이메일입니다.';
-                case 'auth/weak-password':
-                    return '비밀번호는 최소 6자 이상이어야 합니다.';
-                case 'auth/user-not-found':
-                    return '등록되지 않은 이메일입니다.';
-                case 'auth/wrong-password':
-                    return '잘못된 비밀번호입니다.';
-                case 'auth/invalid-email':
-                    return '유효하지 않은 이메일 형식입니다.';
-                default:
-                    return '오류가 발생했습니다. 다시 시도해주세요.';
-            }
-        }
-
-        function formatTime(timestamp) {
-            if (!timestamp) return '';
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString('ko-KR', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
-        }
-
-        // 데모 모드 함수들
-        function showDemoMode() {
-            // 데모용 사용자 생성
-            currentUser = {
-                uid: 'demo-user',
-                displayName: '데모 사용자',
-                email: 'demo@example.com'
-            };
-            
-            showMessenger();
-            setupDemoMessages();
-            
-            document.getElementById('onlineStatus').textContent = '데모 모드 (Firebase 설정 필요)';
-        }
-
-        function setupDemoMessages() {
-            const demoMessages = [
-                { text: '안녕하세요! Firebase 웹메신저에 오신 것을 환영합니다! 🎉', userId: 'demo-bot', userName: 'Bot', timestamp: Date.now() - 60000 },
-                { text: '실제 사용하려면 Firebase 설정이 필요합니다.', userId: 'demo-bot', userName: 'Bot', timestamp: Date.now() - 30000 },
-                { text: '아래 단계를 따라해보세요!', userId: 'demo-bot', userName: 'Bot', timestamp: Date.now() - 10000 }
-            ];
-            
-            displayMessages(demoMessages);
-        }
-
-        function addDemoMessage(message, isOwn) {
-            const container = document.getElementById('messagesContainer');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${isOwn ? 'own' : ''}`;
-            
-            messageDiv.innerHTML = `
-                <div class="message-info">${isOwn ? '나' : 'Bot'}</div>
-                <div class="message-bubble">
-                    ${message}
-                    <div class="message-time">${new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</div>
-                </div>
-            `;
-            
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-            
-            // 봇 응답 (데모용)
-            if (isOwn) {
-                setTimeout(() => {
-                    const responses = [
-                        '좋은 메시지네요! 👍',
-                        'Firebase 설정을 완료하면 실제로 다른 사용자와 채팅할 수 있어요!',
-                        '무료로 실시간 채팅을 구현할 수 있다니 정말 멋지죠? 🚀',
-                        '더 많은 기능을 추가해보세요!'
-                    ];
-                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                    addDemoMessage(randomResponse, false);
-                }, 1000);
-            }
-        }
-    </script>
-</body>
-</html>
+                const allMembers = [currentUser.email, ...group
